@@ -140,21 +140,21 @@ def map_stream_link(link: StreamLink, debrid: DebridService) -> Stream:
     meta: TorrentMeta = TorrentMeta.parse_title(link.name)
 
     meta_parts: list[str] = []
-    if meta.resolution:
-        meta_parts.append(f"📺{meta.resolution}")
-    if meta.bitDepth:
-        meta_parts.append(f"{meta.bitDepth}bit")
+    if resolution := next(iter(meta.resolution), None):
+        meta_parts.append(f"📺{resolution}")
+    if bitDepth := next(iter(meta.bitDepth), None):
+        meta_parts.append(f"{bitDepth}bit")
     if meta.hdr:
         meta_parts.append("HDR")
-    if audio_channels := list(meta.audio_channels):
-        meta_parts.append(f"🔊{audio_channels.pop()}")
-    if meta.codec:
-        meta_parts.append(f"{meta.codec}")
+    if audio_channels := next(iter(meta.audio_channels), None):
+        meta_parts.append(f"🔊{audio_channels}")
+    if codec := next(iter(meta.codec), None):
+        meta_parts.append(f"{codec}")
 
     meta_parts.append(f"💾{human.bytes(float(link.size))}")
 
     name = f"[{debrid.short_name()}+] Annatar {debrid.short_name()}"
-    name += f" {meta.resolution}" if meta.resolution else ""
+    name += f" {resolution}" if resolution else ""
     name += f" {audio_channels}" if audio_channels else ""
 
     return Stream(
