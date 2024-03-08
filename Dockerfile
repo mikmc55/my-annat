@@ -28,4 +28,4 @@ WORKDIR /app
 COPY --from=builder /app /app
 
 # Set the entrypoint for the container
-CMD ["sh", "/app/entrypoint.sh"]
+CMD ["python", "run.py"]
