@@ -177,8 +177,7 @@ async def list_streams(
         imdb_id=imdb_id,
         season_episode=season_episode,
         max_results=user_config.max_results,
-        indexers=user_config.indexers,
-        resolutions=user_config.resolutions,
+        filters=user_config.filters,
     )
 
     for stream in res.streams:

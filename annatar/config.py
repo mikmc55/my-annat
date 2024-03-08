@@ -3,7 +3,9 @@ from base64 import b64decode
 from datetime import datetime
 
 import structlog
-from pydantic import BaseModel
+from pydantic import BaseModel, root_validator
+
+from annatar.api.filters import Filter, by_category
 
 log = structlog.get_logger()
 DEFAULT_INDEXERS = "yts,eztv,kickasstorrents-ws,thepiratebay,therarbg,torrentgalaxy,bitsearch,limetorrents,badasstorrents"
@@ -25,9 +27,27 @@ VERSION = os.getenv("BUILD_VERSION") or "0.0.1"
 class UserConfig(BaseModel):
     debrid_service: str
     debrid_api_key: str
-    indexers: list[str]
-    resolutions: list[str] = ["4K", "QHD", "1080p", "720p", "480p"]
+    filters: list[Filter] = []
     max_results: int = 5
+
+    class Config:
+        extra = "allow"
+
+    @root_validator(pre=True)
+    @classmethod
+    def convert_resolutions(cls, values):
+        """
+        Convert from previous versions that let you filter by resolution to a
+        more generic filter system
+        """
+        if "resolutions" not in values:
+            return values
+        resolutions = values["resolutions"]
+        filters = values.get("filters", []).copy()
+        # the filters are exclusive so we find those that are not in the list
+        filters += [f for f in by_category("Resolution") if f.id not in resolutions]
+        values["filters"] = filters
+        return values
 
     @staticmethod
     def defaults() -> "UserConfig":
@@ -35,7 +55,7 @@ class UserConfig(BaseModel):
             debrid_service="",
             debrid_api_key="",
             max_results=5,
-            indexers=[],
+            filters=[],
         )
 
 

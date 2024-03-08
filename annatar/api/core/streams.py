@@ -9,6 +9,7 @@ from prometheus_client import Counter, Histogram
 from pydantic import ValidationError
 
 from annatar import human, instrumentation
+from annatar.api.filters import Filter
 from annatar.database import db, odm
 from annatar.debrid.models import StreamLink
 from annatar.debrid.providers import DebridService
@@ -30,7 +31,7 @@ async def _search(
     max_results: int,
     debrid: DebridService,
     imdb_id: str,
-    resolutions: list[str],
+    filters: list[Filter],
     season_episode: None | list[int] = None,
 ) -> StreamResponse:
     if season_episode is None:
@@ -51,7 +52,7 @@ async def _search(
         debrid=debrid,
         imdb=imdb_id,
         max_results=max_results,
-        resolutions=resolutions,
+        filters=filters,
         season=season_episode[0] if len(season_episode) == 2 else 0,
         episode=season_episode[1] if len(season_episode) == 2 else 0,
     )
@@ -74,11 +75,11 @@ async def get_stream_links(
     debrid: DebridService,
     imdb: str,
     max_results: int,
-    resolutions: list[str],
+    filters: list[Filter],
     season: int = 0,
     episode: int = 0,
 ) -> list[StreamLink]:
-    log.debug("getting stream links", imdb=imdb, max_results=max_results, resolutions=resolutions)
+    log.debug("getting stream links", imdb=imdb, max_results=max_results, filters=filters)
 
     # this is essentially a countdown. The timeout is how long the lock will be
     # held for. If we can lock it then we likely just kicked off a new search so
@@ -98,7 +99,7 @@ async def get_stream_links(
             imdb=imdb,
             season=season,
             episode=episode,
-            resolutions=resolutions,
+            filters=filters,
         )
     log.debug("done searching for torrents", count=len(torrents))
 
@@ -116,7 +117,7 @@ async def get_stream_links(
         total_processed += 1
         resolution: str = ""
         try:
-            resolution: str = TorrentMeta.parse_title(link.name).resolution
+            resolution: str = next(iter(TorrentMeta.parse_title(link.name).resolution), "NONE")
         except ValidationError as e:
             log.debug("error parsing title", title=link.name, exc_info=e)
             continue
@@ -145,8 +146,8 @@ def map_stream_link(link: StreamLink, debrid: DebridService) -> Stream:
         meta_parts.append(f"{meta.bitDepth}bit")
     if meta.hdr:
         meta_parts.append("HDR")
-    if meta.audio_channels:
-        meta_parts.append(f"🔊{meta.audio_channels}")
+    if audio_channels := list(meta.audio_channels):
+        meta_parts.append(f"🔊{audio_channels.pop()}")
     if meta.codec:
         meta_parts.append(f"{meta.codec}")
 
@@ -154,7 +155,7 @@ def map_stream_link(link: StreamLink, debrid: DebridService) -> Stream:
 
     name = f"[{debrid.short_name()}+] Annatar {debrid.short_name()}"
     name += f" {meta.resolution}" if meta.resolution else ""
-    name += f" {meta.audio_channels}" if meta.audio_channels else ""
+    name += f" {audio_channels}" if audio_channels else ""
 
     return Stream(
         url=link.url.strip(),
@@ -196,23 +197,19 @@ async def search(
     debrid: DebridService,
     imdb_id: str,
     season_episode: None | list[int] = None,
-    indexers: None | list[str] = None,
-    resolutions: None | list[str] = None,
+    filters: list[Filter] | None = None,
 ) -> StreamResponse:
-    if indexers is None:
-        indexers = []
+    if filters is None:
+        filters = []
     if season_episode is None:
         season_episode = []
-    if resolutions is None:
-        resolutions = []
 
     log.debug(
         "searching for content",
         type=type,
         id=imdb_id,
         season_episode=season_episode,
-        indexers=indexers,
-        resolutions=resolutions,
+        filters=filters,
     )
     with REQUEST_DURATION.labels(
         type=type,
@@ -225,7 +222,7 @@ async def search(
                 debrid=debrid,
                 imdb_id=imdb_id,
                 season_episode=season_episode,
-                resolutions=resolutions,
+                filters=filters,
             )
         except Exception as e:
             log.error("error searching", type=type, id=imdb_id, exc_info=e)
