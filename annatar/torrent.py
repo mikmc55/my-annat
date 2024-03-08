@@ -117,9 +117,9 @@ class TorrentMeta(BaseModel):
                 return "5K"
             if v.lower() == "4320p":
                 return "8K"
-            return ""
+            return v
         if isinstance(v, list):
-            return [cls.standardize_resolution(r) for r in v if r]
+            return [x for x in [cls.standardize_resolution(r) for r in v if r] if x]
         return v
 
     @field_validator("imdb", mode="before")
@@ -142,7 +142,6 @@ class TorrentMeta(BaseModel):
     def parse_title(title: str) -> "TorrentMeta":
         meta: dict[Any, Any] = PTN.parse(title, standardise=True, coherent_types=True)
         meta["raw_title"] = title
-        log.debug("parsed title", title=title, meta=meta)
         return TorrentMeta.model_validate(meta)
 
     @property

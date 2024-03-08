@@ -86,6 +86,9 @@ async def list_torrents(
                     continue
                 meta = torrent.TorrentMeta.parse_title(title)
                 if any(f.apply(meta) for f in filters):
+                    log.debug(
+                        "filtered torrent", title=title, filters=[f.id for f in filters], meta=meta
+                    )
                     continue
             results.append(item)
             if len(results) >= limit:

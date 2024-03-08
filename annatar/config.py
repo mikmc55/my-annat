@@ -23,6 +23,8 @@ PROM_DIR = os.getenv(
 )
 VERSION = os.getenv("BUILD_VERSION") or "0.0.1"
 
+RESOLUTION_FILTERS = [f for f in by_category("Resolution")]
+
 
 class UserConfig(BaseModel):
     debrid_service: str
@@ -42,10 +44,12 @@ class UserConfig(BaseModel):
         """
         if "resolutions" not in values:
             return values
-        resolutions = values["resolutions"]
+        resolutions = [r.lower() for r in values["resolutions"]]
         filters = values.get("filters", []).copy()
         # the filters are exclusive so we find those that are not in the list
-        filters += [f for f in by_category("Resolution") if f.id not in resolutions]
+        for f in by_category("Resolution"):
+            if f.id.lower() not in resolutions:
+                filters.append(f)
         values["filters"] = filters
         return values
 

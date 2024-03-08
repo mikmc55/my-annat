@@ -12,6 +12,9 @@ class Filter(BaseModel):
     apply: Callable[[TorrentMeta], bool] = Field(..., exclude=True)
     category: str
 
+    def __str__(self) -> str:
+        return self.name
+
 
 ALL = (
     [
@@ -19,31 +22,31 @@ ALL = (
         Filter(
             id="4k",
             name="4K (2160p)",
-            apply=lambda meta: meta.resolution == "4K",
+            apply=lambda meta: "4K" in meta.resolution,
             category="Resolution",
         ),
         Filter(
             id="qhd",
             name="QHD (1440p)",
-            apply=lambda meta: meta.resolution == "1440p",
+            apply=lambda meta: "1440p" in meta.resolution,
             category="Resolution",
         ),
         Filter(
             id="1080p",
             name="1080p",
-            apply=lambda meta: meta.resolution == "1080p",
+            apply=lambda meta: "1080p" in meta.resolution,
             category="Resolution",
         ),
         Filter(
             id="720p",
             name="720p",
-            apply=lambda meta: meta.resolution == "720p",
+            apply=lambda meta: "720p" in meta.resolution,
             category="Resolution",
         ),
         Filter(
             id="480p",
             name="480p",
-            apply=lambda meta: meta.resolution == "480p",
+            apply=lambda meta: "480p" in meta.resolution,
             category="Resolution",
         ),
         Filter(
