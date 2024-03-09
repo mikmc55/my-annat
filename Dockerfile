@@ -27,5 +27,8 @@ WORKDIR /app
 # Copy from the builder stage (your custom image)
 COPY --from=builder /app /app
 
+# Install additional dependencies
+RUN pip install uvicorn
+
 # Set the entrypoint for the container
 CMD ["python", "run.py"]
