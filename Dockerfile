@@ -56,7 +56,7 @@ COPY run.py /app/run.py
 COPY entrypoint.sh /app/entrypoint.sh
 
 # Set build version as an environment variable
-ARG BUILD_VERSION=1.1.1
+ARG BUILD_VERSION=1.0.5
 ENV BUILD_VERSION=${BUILD_VERSION}
 
 # Set the entrypoint for the container
