@@ -19,7 +19,7 @@ services:
       JACKETT_API_KEY: "a6q3edvwsd4pl9155lyu0lrwmngq4awu"
       JACKETT_MAX_RESULTS: "100" # max results from jackett search
       JACKETT_TIMEOUT: "60" # max time spent searching per indexer.
-      JACKETT_INDEXERS: "aftershock,beload,bestcore,estone,filelist,itorrent,mypornclub,speedapp,thepiratebay,therarbg,ztracker"
+      JACKETT_INDEXERS: "1337x,bestcore,carphunter,filelist,itorrent,speedapp,thepiratebay,therarbg"
       LISTEN_PORT: "8000"
 
   jackett:
