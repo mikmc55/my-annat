@@ -1,6 +1,35 @@
 ---
 version: '3.8'
+volumes:---
+version: '3.8'
 volumes:
+  jackett_config: {}
+  redis_data: {}
+
+services:
+  annatar:
+    image: docker.io/mikmc/annatar:latest
+    ports:
+      - "8000:8000"
+    depends_on:
+      - jackett
+    volumes:
+      - "redis_data:/app/data"
+    environment:
+      LOG_LEVEL: debug
+      JACKETT_URL: "http://167.86.78.215:9117"
+      JACKETT_API_KEY: "a6q3edvwsd4pl9155lyu0lrwmngq4awu"
+      JACKETT_MAX_RESULTS: "100" # max results from jackett search
+      JACKETT_TIMEOUT: "60" # max time spent searching per indexer.
+      JACKETT_INDEXERS: "1337x,bestcore,carphunter,filelist,itorrent,speedapp,thepiratebay,therarbg"
+      LISTEN_PORT: "8000"
+
+  jackett:
+    image: docker.io/linuxserver/jackett
+    ports:
+      - 9117:9117
+    volumes:
+      - jackett_config:/config
   jackett_config: {}
   redis_data: {}
 
