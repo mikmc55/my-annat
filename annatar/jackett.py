@@ -28,7 +28,7 @@ JACKETT_URL: str = os.environ.get("JACKETT_URL", "http://167.86.78.215:9117")
 JACKETT_API_KEY: str = os.environ.get("JACKETT_API_KEY", "a6q3edvwsd4pl9155lyu0lrwmngq4awu")
 
 JACKETT_MAX_RESULTS = int(os.environ.get("JACKETT_MAX_RESULTS", 100))
-JACKETT_TIMEOUT = int(os.environ.get("JACKETT_TIMEOUT", 6))
+JACKETT_TIMEOUT = int(os.environ.get("JACKETT_TIMEOUT", 5))
 API_SEARCH_TIMEOUT = int(os.environ.get("API_SEARCH_TIMEOUT", 10))
 SEARCH_TTL = timedelta(weeks=1)
 JACKETT_CACHE_MINUTES = timedelta(minutes=int(os.environ.get("JACKETT_CACHE_MINUTES", 15)))
